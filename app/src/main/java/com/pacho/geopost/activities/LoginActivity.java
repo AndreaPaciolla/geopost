@@ -3,11 +3,15 @@ package com.pacho.geopost.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,19 +20,28 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.pacho.geopost.R;
-import com.pacho.geopost.async.AuthTask;
+import com.pacho.geopost.services.HttpVolleyQueue;
+import com.pacho.geopost.utilities.api;
+import com.tapadoo.alerter.Alerter;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity {
 
+    // MY_PREFS_NAME - a static String variable like:
+    public static final String GEOPOST_PREFS = "geopost_prefs";
+    public static final String SESSION_ID = "session_id";
+    public static final String USER_EMAIL = "user_email";
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private AuthTask mAuthTask = null;
+    // Require an editor of shared preferences
+    SharedPreferences.Editor editor;
 
     // UI references.
     private EditText mEmailView;
@@ -64,6 +77,8 @@ public class LoginActivity extends AppCompatActivity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        editor = getSharedPreferences(GEOPOST_PREFS, MODE_PRIVATE).edit();
     }
 
     /**
@@ -72,10 +87,6 @@ public class LoginActivity extends AppCompatActivity {
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -113,8 +124,44 @@ public class LoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new AuthTask(email, password, this);
-            mAuthTask.execute((Void) null);
+            // Track the activity context
+            final Activity that = this;
+
+            // Fire out new request
+            Log.d("BackgroundLoginRequest", "doInBackground....");
+            StringRequest request = new StringRequest(Request.Method.GET, api.LOGIN,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            Log.d("BackgroundLoginRequest", "onResponse");
+                            showProgress(false);
+                            Alerter.create(that)
+                                    .setTitle("Alert Title")
+                                    .setText(response.toString())
+                                    .show();
+
+                            // Store the session_id just created by login
+                            editor.putString(SESSION_ID, response.toString());
+                            editor.putString(USER_EMAIL, mEmailView.getText().toString());
+                            editor.apply(); // better to call apply instead of commit() - commit is sync
+
+                            // Go to dashboard
+                            startDashboard();
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            // TODO Auto-generated method stub
+                            showProgress(false);
+                            Log.d("BackgroundLoginRequest", "onErrorResponse".concat(error.toString()));
+                            mPasswordView.setError(getString(R.string.error_incorrect_password));
+                            mPasswordView.requestFocus();
+                        }
+                    });
+
+            RequestQueue queue = HttpVolleyQueue.getInstance().getRequestQueue();
+            queue.add(request);
         }
     }
 
@@ -164,5 +211,9 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private void startDashboard() {
+        Intent intent = new Intent(this, DashboardActivity.class);
+        startActivity(intent);
+    }
 }
 
