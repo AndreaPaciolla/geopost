@@ -27,7 +27,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.pacho.geopost.R;
 import com.pacho.geopost.services.HttpVolleyQueue;
-import com.pacho.geopost.utilities.api;
+import com.pacho.geopost.utilities.Api;
 import com.tapadoo.alerter.Alerter;
 
 /**
@@ -129,7 +129,7 @@ public class LoginActivity extends AppCompatActivity {
 
             // Fire out new request
             Log.d("BackgroundLoginRequest", "doInBackground....");
-            StringRequest request = new StringRequest(Request.Method.GET, api.LOGIN,
+            StringRequest request = new StringRequest(Request.Method.GET, Api.LOGIN,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {

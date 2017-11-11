@@ -1,0 +1,22 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.pacho.geopost.fragments.AddFriendFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <AutoCompleteTextView
+        android:id="@+id/txtFriends"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnAddFriend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:elevation="0dp"
+        android:text="@string/addProfileFragment_btnAddFriend"/>
+
+</FrameLayout>
