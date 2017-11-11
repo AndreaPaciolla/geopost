@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.pacho.geopost.fragments.AddFriendFragment;
 import com.pacho.geopost.fragments.MapFragment;
 import com.pacho.geopost.R;
+import com.pacho.geopost.fragments.ProfileFragment;
 import com.pacho.geopost.fragments.UpdateStateFragment;
 
 public class DashboardActivity extends AppCompatActivity {
@@ -32,7 +33,7 @@ public class DashboardActivity extends AppCompatActivity {
                 case R.id.navigation_add_friend:
                     transaction.replace(R.id.content, new AddFriendFragment());
                 case R.id.navigation_profile:
-                    transaction.replace(R.id.content, new AddFriendFragment());
+                    transaction.replace(R.id.content, new ProfileFragment());
             }
             transaction.commit();
             return true;
