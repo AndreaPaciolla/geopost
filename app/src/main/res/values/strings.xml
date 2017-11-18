@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Geopost</string>
 
+    <string name="google_maps_API_key">AIzaSyCkbmK_VN-K6JxGBitJ2As2etfEL6CizEI</string>
+
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>

@@ -9,6 +9,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /* @description
  * A common RequestQueue object for your Android app using Google Volley in the form of a Singleton.
  * The singleton provides access to static RequestQueue and ImageLoader objects via its two methods:

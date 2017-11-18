@@ -10,5 +10,6 @@ public class Api {
     public static final String LOGOUT = "https://ewserver.di.unimi.it/mobicomp/geopost/logout";
     public static final String USERS = "https://ewserver.di.unimi.it/mobicomp/geopost/users";
     public static final String FOLLOW = "https://ewserver.di.unimi.it/mobicomp/geopost/follow";
+    public static final String FOLLOWED = "https://ewserver.di.unimi.it/mobicomp/geopost/followed";
 
 }

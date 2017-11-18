@@ -1,15 +1,30 @@
 package com.pacho.geopost.fragments;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.pacho.geopost.R;
+
+import static android.content.Context.LOCATION_SERVICE;
 
 
 /**
@@ -20,11 +35,33 @@ import com.pacho.geopost.R;
  * Use the {@link UpdateStateFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class UpdateStateFragment extends Fragment {
+public class UpdateStateFragment extends Fragment implements LocationListener {
+
+    private static final String TAG = "UpdateStateFragment";
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+
+    private LocationManager mLocationManager;
+    private GoogleApiClient mGoogleApiClient;
+
+    @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {}
+
+    @Override
+    public void onProviderDisabled(String s) {}
+
+    @Override
+    public void onProviderEnabled(String s) {}
+
+    private boolean mLocationPermissionGranted;
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    EditText mStateView;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -61,11 +98,55 @@ public class UpdateStateFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        mLocationPermissionGranted = false;
+        // Assume thisActivity is the current activity
+        getLocationPermission();
+
+
+        LocationRequest mLocationRequest = LocationRequest.create();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    }
+
+
+    private void getLocationPermission() {
+        String[] permissions = { android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION };
+
+        if(ContextCompat.checkSelfPermission( getContext(), FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED) {
+            if(ContextCompat.checkSelfPermission( getActivity().getApplicationContext(), COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionGranted = true;
+                //initMap();
+            } else {
+                ActivityCompat.requestPermissions( getActivity(), permissions, LOCATION_PERMISSION_REQUEST_CODE);
+            }
+        } else {
+            ActivityCompat.requestPermissions( getActivity(), permissions, LOCATION_PERMISSION_REQUEST_CODE);
+        }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch(requestCode) {
+            case LOCATION_PERMISSION_REQUEST_CODE: {
+                if(grantResults.length > 0) {
+                    for(int i = 0; i < grantResults.length; i++) {
+                        if(grantResults[i] != PackageManager.PERMISSION_GRANTED)
+                            // initialize the map
+                            mLocationPermissionGranted = false;
+                        return;
+                    }
+                    mLocationPermissionGranted = true;
+                    Toast.makeText(getContext(), "Got location permissin", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_update_state, container, false);
     }
@@ -107,4 +188,12 @@ public class UpdateStateFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+    @Override
+    public void onLocationChanged(final Location location) {
+        Log.d(TAG, "onLocationChanged: got new location " + location.toString());
+        mStateView.setText(location.toString());
+    }
+
+
 }

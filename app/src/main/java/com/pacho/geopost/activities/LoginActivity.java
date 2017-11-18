@@ -30,6 +30,9 @@ import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;
 import com.tapadoo.alerter.Alerter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A login screen that offers login via email/password.
  */
@@ -126,15 +129,13 @@ public class LoginActivity extends AppCompatActivity {
             final Activity that = this;
 
             // Fire out new request
-            Log.d("BackgroundLoginRequest", "doInBackground....");
-            String requestUri = Api.LOGIN.concat("?username=").concat(mUsernameView.getText().toString()).concat("&password=").concat(mPasswordView.getText().toString());
-            Log.d(TAG, requestUri);
-            StringRequest request = new StringRequest(Request.Method.POST, requestUri,
+            Log.d(TAG, "doInBackground....");
+            Log.d(TAG, Api.LOGIN);
+            StringRequest request = new StringRequest(Request.Method.POST, Api.LOGIN,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            Log.d("BackgroundLoginRequest", "onResponse");
-                            Log.d(TAG, response);
+                            Log.d("BackgroundLoginRequest", "onResponse token ".concat(response.toString()));
                             showProgress(false);
                             Alerter.create(that)
                                     .setTitle("Alert Title")
@@ -159,7 +160,15 @@ public class LoginActivity extends AppCompatActivity {
                             mPasswordView.setError(getString(R.string.error_incorrect_password));
                             mPasswordView.requestFocus();
                         }
-                    });
+                    }){
+                    @Override
+                    protected Map<String, String> getParams() {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("username", mUsernameView.getText().toString());
+                        params.put("password", mPasswordView.getText().toString());
+                        return params;
+                    }
+            };
 
             RequestQueue queue = HttpVolleyQueue.getInstance().getRequestQueue();
             queue.add(request);
@@ -168,7 +177,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 4;
     }
 
     /**
