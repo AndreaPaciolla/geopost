@@ -35,6 +35,8 @@ import com.tapadoo.alerter.Alerter;
  */
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = "LoginActivity";
+
     // MY_PREFS_NAME - a static String variable like:
     public static final String GEOPOST_PREFS = "geopost_prefs";
     public static final String SESSION_ID = "session_id";
@@ -44,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
 
     // UI references.
-    private EditText mEmailView;
+    private EditText mUsernameView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
@@ -54,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mEmailView = (EditText)findViewById(R.id.email);
+        mUsernameView = (EditText)findViewById(R.id.username);
         mPasswordView = (EditText)findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -88,11 +90,11 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void attemptLogin() {
         // Reset errors.
-        mEmailView.setError(null);
+        mUsernameView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        String email = mUsernameView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -105,14 +107,10 @@ public class LoginActivity extends AppCompatActivity {
             cancel = true;
         }
 
-        // Check for a valid email address.
+        // Check for a valid username.
         if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+            mUsernameView.setError(getString(R.string.error_field_required));
+            focusView = mUsernameView;
             cancel = true;
         }
 
@@ -129,11 +127,14 @@ public class LoginActivity extends AppCompatActivity {
 
             // Fire out new request
             Log.d("BackgroundLoginRequest", "doInBackground....");
-            StringRequest request = new StringRequest(Request.Method.GET, Api.LOGIN,
+            String requestUri = Api.LOGIN.concat("?username=").concat(mUsernameView.getText().toString()).concat("&password=").concat(mPasswordView.getText().toString());
+            Log.d(TAG, requestUri);
+            StringRequest request = new StringRequest(Request.Method.POST, requestUri,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             Log.d("BackgroundLoginRequest", "onResponse");
+                            Log.d(TAG, response);
                             showProgress(false);
                             Alerter.create(that)
                                     .setTitle("Alert Title")
@@ -142,7 +143,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             // Store the session_id just created by login
                             editor.putString(SESSION_ID, response.toString());
-                            editor.putString(USER_EMAIL, mEmailView.getText().toString());
+                            editor.putString(USER_EMAIL, mUsernameView.getText().toString());
                             editor.apply(); // better to call apply instead of commit() - commit is sync
 
                             // Go to dashboard
@@ -163,11 +164,6 @@ public class LoginActivity extends AppCompatActivity {
             RequestQueue queue = HttpVolleyQueue.getInstance().getRequestQueue();
             queue.add(request);
         }
-    }
-
-    private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
