@@ -7,11 +7,19 @@
     <!-- TODO: Update blank fragment layout -->
 
     <EditText
-        android:id="@+id/state"
+        android:id="@+id/txtState"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
         android:text="Name" />
+
+    <Button
+        android:id="@+id/btnUpdateState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:elevation="0dp"
+        android:text="Update state" />
 
 </FrameLayout>

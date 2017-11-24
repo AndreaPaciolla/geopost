@@ -25,6 +25,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.pacho.geopost.R;
 import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;
+import com.pacho.geopost.utilities.AppConstants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,9 +46,6 @@ import java.util.List;
 public class AddFriendFragment extends Fragment {
 
     private static final String TAG = "AddFriendFragment";
-
-    public static final String GEOPOST_PREFS = "geopost_prefs";
-    public static final String SESSION_ID_KEY = "session_id";
 
     private String session_id;
 
@@ -100,7 +98,9 @@ public class AddFriendFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        session_id = this.getActivity().getSharedPreferences(GEOPOST_PREFS, this.getActivity().MODE_PRIVATE).getString(SESSION_ID_KEY, null);
+        session_id = this.getActivity()
+                         .getSharedPreferences(AppConstants.GEOPOST_PREFS, this.getActivity().MODE_PRIVATE)
+                         .getString(AppConstants.SESSION_ID, null);
         Log.d(TAG, "Retrieved session_id=".concat(session_id.toString()));
     }
 

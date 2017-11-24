@@ -28,6 +28,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.pacho.geopost.R;
 import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;
+import com.pacho.geopost.utilities.AppConstants;
 import com.tapadoo.alerter.Alerter;
 
 import java.util.HashMap;
@@ -39,11 +40,6 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
-
-    // MY_PREFS_NAME - a static String variable like:
-    public static final String GEOPOST_PREFS = "geopost_prefs";
-    public static final String SESSION_ID = "session_id";
-    public static final String USER_EMAIL = "user_email";
 
     // Require an editor of shared preferences
     SharedPreferences.Editor editor;
@@ -83,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        editor = getSharedPreferences(GEOPOST_PREFS, MODE_PRIVATE).edit();
+        editor = getSharedPreferences(AppConstants.GEOPOST_PREFS, MODE_PRIVATE).edit();
     }
 
     /**
@@ -143,8 +139,8 @@ public class LoginActivity extends AppCompatActivity {
                                     .show();
 
                             // Store the session_id just created by login
-                            editor.putString(SESSION_ID, response.toString());
-                            editor.putString(USER_EMAIL, mUsernameView.getText().toString());
+                            editor.putString(AppConstants.SESSION_ID, response.toString());
+                            editor.putString(AppConstants.USER_EMAIL, mUsernameView.getText().toString());
                             editor.apply(); // better to call apply instead of commit() - commit is sync
 
                             // Go to dashboard

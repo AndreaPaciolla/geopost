@@ -2,27 +2,47 @@ package com.pacho.geopost.fragments;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.pacho.geopost.R;
+import com.pacho.geopost.services.HttpVolleyQueue;
+import com.pacho.geopost.utilities.Api;
+import com.pacho.geopost.utilities.AppConstants;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -35,26 +55,19 @@ import static android.content.Context.LOCATION_SERVICE;
  * Use the {@link UpdateStateFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class UpdateStateFragment extends Fragment implements LocationListener {
+public class UpdateStateFragment extends Fragment {
 
     private static final String TAG = "UpdateStateFragment";
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int REQUEST_LOCATION = 1;
 
     private LocationManager mLocationManager;
-    private GoogleApiClient mGoogleApiClient;
+    private LocationListener mLocationListener;
+    private HttpVolleyQueue volleyInstance;
+    private Location currentLocation;
+    private String session_id;
 
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {}
-
-    @Override
-    public void onProviderDisabled(String s) {}
-
-    @Override
-    public void onProviderEnabled(String s) {}
-
-    private boolean mLocationPermissionGranted;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -62,6 +75,7 @@ public class UpdateStateFragment extends Fragment implements LocationListener {
     private static final String ARG_PARAM2 = "param2";
 
     EditText mStateView;
+    Button mUpdateStateButton;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -98,64 +112,115 @@ public class UpdateStateFragment extends Fragment implements LocationListener {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        mLocationPermissionGranted = false;
-        // Assume thisActivity is the current activity
-        getLocationPermission();
+
+        // Get volley instance
+        volleyInstance = HttpVolleyQueue.getInstance();
+
+        // get saved session_id
+        session_id = this.getActivity()
+                         .getSharedPreferences(AppConstants.GEOPOST_PREFS, this.getActivity().MODE_PRIVATE)
+                         .getString(AppConstants.SESSION_ID, null);
+
+        mLocationManager = (LocationManager) getActivity().getSystemService(getContext().LOCATION_SERVICE);
+
+        mLocationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                if(location == null) {
+                    Toast.makeText(getContext(), "Null location got", Toast.LENGTH_LONG).show();
+                } else {
+                    currentLocation = location;
+                    Toast.makeText(getContext(), "Location got. Lat: " + location.getLatitude() + ", Lon: " + location.getLongitude(), Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        };
+
+        if (ActivityCompat.checkSelfPermission(getContext(), FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getContext(), COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.INTERNET
+            }, REQUEST_LOCATION);
+            return;
+        } else {
+            configureButton();
+        }
 
 
-        LocationRequest mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    }
+
+    private void updateState(Editable text) {
+        String requestUri = Api.USERS + "?" + session_id + "&message=" + text.toString() + "&lat="+currentLocation.getLatitude()+"&lon="+currentLocation.getLongitude();
+        Log.d(TAG, "updateState: firing request " + requestUri);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, requestUri, null,
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "updateState onRespose" + response.toString());
+                        Toast.makeText(getContext(), "State has been updated", Toast.LENGTH_LONG).show();
+                        mStateView.setText("");
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, "updateState onError".concat(error.toString()));
+            }
+        });
+
+        volleyInstance.getRequestQueue().add(request);
+    }
+
+    private void configureButton() {
+        mLocationManager.requestLocationUpdates("gps", 5000, 0, mLocationListener);
     }
 
 
-    private void getLocationPermission() {
-        String[] permissions = { android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION };
-
-        if(ContextCompat.checkSelfPermission( getContext(), FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED) {
-            if(ContextCompat.checkSelfPermission( getActivity().getApplicationContext(), COARSE_LOCATION ) == PackageManager.PERMISSION_GRANTED) {
-                mLocationPermissionGranted = true;
-                //initMap();
-            } else {
-                ActivityCompat.requestPermissions( getActivity(), permissions, LOCATION_PERMISSION_REQUEST_CODE);
-            }
-        } else {
-            ActivityCompat.requestPermissions( getActivity(), permissions, LOCATION_PERMISSION_REQUEST_CODE);
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch(requestCode) {
+            case REQUEST_LOCATION:
+                configureButton();
+                break;
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        mLocationPermissionGranted = false;
-        switch(requestCode) {
-            case LOCATION_PERMISSION_REQUEST_CODE: {
-                if(grantResults.length > 0) {
-                    for(int i = 0; i < grantResults.length; i++) {
-                        if(grantResults[i] != PackageManager.PERMISSION_GRANTED)
-                            // initialize the map
-                            mLocationPermissionGranted = false;
-                        return;
-                    }
-                    mLocationPermissionGranted = true;
-                    Toast.makeText(getContext(), "Got location permissin", Toast.LENGTH_SHORT).show();
-                }
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        // Configure the views
+        mStateView = (EditText) view.findViewById(R.id.txtState);
+        mUpdateStateButton = (Button) view.findViewById(R.id.btnUpdateState);
+        mUpdateStateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateState(mStateView.getText());
             }
-        }
+        });
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_update_state, container, false);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
@@ -188,12 +253,5 @@ public class UpdateStateFragment extends Fragment implements LocationListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
-
-    @Override
-    public void onLocationChanged(final Location location) {
-        Log.d(TAG, "onLocationChanged: got new location " + location.toString());
-        mStateView.setText(location.toString());
-    }
-
 
 }
