@@ -1,15 +1,32 @@
 package com.pacho.geopost.fragments;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.pacho.geopost.R;
+import com.pacho.geopost.activities.LoginActivity;
+import com.pacho.geopost.services.HttpVolleyQueue;
+import com.pacho.geopost.utilities.Api;
+import com.pacho.geopost.utilities.AppConstants;
+
+import org.json.JSONObject;
+
+import static android.content.Context.MODE_PRIVATE;
 
 
 /**
@@ -21,6 +38,8 @@ import com.pacho.geopost.R;
  * create an instance of this fragment.
  */
 public class ProfileFragment extends Fragment {
+    private static final String TAG = "ProfileFragment";
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -29,6 +48,12 @@ public class ProfileFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private Button mButtonLogout;
+    private HttpVolleyQueue volleyInstance;
+    private String session_id;
+    // Require an editor of shared preferences
+    SharedPreferences.Editor editor;
 
     private OnFragmentInteractionListener mListener;
 
@@ -61,6 +86,56 @@ public class ProfileFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        // Get volley instance
+        volleyInstance = HttpVolleyQueue.getInstance();
+        // Get the session_id
+        session_id = this.getActivity()
+                .getSharedPreferences(AppConstants.GEOPOST_PREFS, this.getActivity().MODE_PRIVATE)
+                .getString(AppConstants.SESSION_ID, null);
+        // Get an editable instance of editor
+        editor = getActivity().getSharedPreferences(AppConstants.GEOPOST_PREFS, MODE_PRIVATE).edit();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        mButtonLogout = (Button)view.findViewById(R.id.btnLogout);
+        mButtonLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                doLogout();
+            }
+        });
+    }
+
+    private void doLogout() {
+        String requestUri = Api.USERS + "?session_id=" + session_id;
+        Log.d(TAG, "doLogout: firing request " + requestUri);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, requestUri, null,
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "doLogout onRespose" + response.toString());
+                        Toast.makeText(getContext(), "Goodbye", Toast.LENGTH_LONG).show();
+                        // Reset the sharedPreferences
+                        Log.d(TAG, "doLogout onResponse: removing sharedPreferences...");
+                        editor.putString(AppConstants.SESSION_ID, null);
+                        editor.putString(AppConstants.USER_EMAIL, null);
+                        editor.apply(); // better to call apply instead of commit() - commit is sync
+                        // Change activity
+                        Intent intent = new Intent(getContext(), LoginActivity.class);
+                        startActivity(intent);
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, "doLogout onError".concat(error.toString()));
+            }
+        });
+
+        volleyInstance.getRequestQueue().add(request);
     }
 
     @Override
