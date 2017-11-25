@@ -11,15 +11,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
+        android:hint="What are you doing?"
         android:inputType="textPersonName"
-        android:text="Name" />
+        android:padding="15dp" />
 
     <Button
         android:id="@+id/btnUpdateState"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
+        android:backgroundTint="@color/colorPrimary"
         android:elevation="0dp"
-        android:text="Update state" />
+        android:padding="25dp"
+        android:text="Update state"
+        android:textColor="@color/colorWhite" />
 
 </FrameLayout>

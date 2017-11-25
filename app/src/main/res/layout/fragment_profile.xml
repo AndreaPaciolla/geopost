@@ -10,17 +10,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-
     <Button
         android:id="@+id/btnLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="55dp"
         android:layout_alignParentBottom="true"
-        android:text="LOGOUT" />
+        android:layout_marginTop="55dp"
+        android:backgroundTint="@color/colorAccent"
+        android:text="LOGOUT"
+        android:textColor="@color/colorWhite" />
 
 </FrameLayout>

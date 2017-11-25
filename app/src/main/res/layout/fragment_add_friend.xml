@@ -9,14 +9,18 @@
     <AutoCompleteTextView
         android:id="@+id/txtFriends"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:hint="Start typing your friend's name"
+        android:padding="15dp" />
 
     <Button
         android:id="@+id/btnAddFriend"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
+        android:backgroundTint="@color/colorPrimary"
         android:elevation="0dp"
-        android:text="@string/addProfileFragment_btnAddFriend"/>
+        android:text="@string/addProfileFragment_btnAddFriend"
+        android:textColor="@color/colorWhite" />
 
 </FrameLayout>
