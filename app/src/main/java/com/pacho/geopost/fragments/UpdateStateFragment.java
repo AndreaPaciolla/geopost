@@ -29,6 +29,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -167,14 +168,22 @@ public class UpdateStateFragment extends Fragment {
     }
 
     private void updateState(Editable text) {
-        String requestUri = Api.USERS + "?" + session_id + "&message=" + text.toString() + "&lat="+currentLocation.getLatitude()+"&lon="+currentLocation.getLongitude();
+
+        // Avoid crash if we don't have currentLocation
+        if( currentLocation == null ) {
+            currentLocation = new Location("dummyprovider");
+            currentLocation.setLatitude(45.4942699);
+            currentLocation.setLongitude(9.1122565);
+        }
+
+        String requestUri = Api.STATUS_UPDATE + "?session_id=" + session_id + "&message=" + text.toString() + "&lat="+currentLocation.getLatitude()+"&lon="+currentLocation.getLongitude();
         Log.d(TAG, "updateState: firing request " + requestUri);
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, requestUri, null,
-                new Response.Listener<JSONObject>() {
+        StringRequest request = new StringRequest(Request.Method.POST, requestUri,
+                new Response.Listener<String>() {
 
                     @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d(TAG, "updateState onRespose" + response.toString());
+                    public void onResponse(String response) {
+                        Log.d(TAG, "updateState onRespose" + response);
                         Toast.makeText(getContext(), "State has been updated", Toast.LENGTH_LONG).show();
                         mStateView.setText("");
                     }
@@ -182,7 +191,7 @@ public class UpdateStateFragment extends Fragment {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, "updateState onError".concat(error.toString()));
+                Log.d(TAG, "updateState onError: " + error.toString());
             }
         });
 

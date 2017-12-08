@@ -12,10 +12,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -78,6 +83,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final float DEFAULT_ZOOM = 15f;
 
     private boolean mLocationPermissionGranted = false;
+
+    private Button mButtonChangeView;
+    private ListView mFollowedUsersListView;
+
+    private String mCurrentViewMode = "MAP"; // MAP | LIST
 
     private MapView mapView;
     private GoogleMap map;
@@ -258,8 +268,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         MapsInitializer.initialize(this.getActivity());
 
+        // Change view
+        mFollowedUsersListView = (ListView) v.findViewById(R.id.followedUsersListView);
+        mButtonChangeView = (Button) v.findViewById(R.id.btnChangeView);
+        mButtonChangeView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleViewMode();
+            }
+        });
+
         return v;
     }
+
 
     @Override
     public void onResume() {
@@ -313,6 +334,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         void onFragmentInteraction(Uri uri);
     }
 
+    private void toggleViewMode() {
+        if(mCurrentViewMode.equals("MAP")) {
+            mCurrentViewMode = "LIST";
+            mButtonChangeView.setText("MAP");
+            mapView.setVisibility(View.INVISIBLE);
+            mFollowedUsersListView.setVisibility(View.VISIBLE);
+        } else {
+            mCurrentViewMode = "MAP";
+            mButtonChangeView.setText("LIST");
+            mapView.setVisibility(View.VISIBLE);
+            mFollowedUsersListView.setVisibility(View.INVISIBLE);
+        }
+    }
+
     public void queryFollowedUsers() {
 
         String requestUri = Api.FOLLOWED.concat("?session_id=").concat(session_id);
@@ -340,6 +375,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             }
 
                             addMarkers(followedUsers);
+
+                            // parse into Array<String> for list view
+                            ArrayList<String> users = new ArrayList<String>();
+                            for(int i = 0; i < followedUsers.size(); i++){
+                                users.add(followedUsers.get(i).getUsername() + " - " + followedUsers.get(i).getMsg());
+                            }
+
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, users);
+                            mFollowedUsersListView.setAdapter(adapter);
 
                         } catch (JSONException e) {
                             e.printStackTrace();

@@ -3,6 +3,7 @@ package com.pacho.geopost.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,19 +13,34 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 import com.pacho.geopost.R;
+import com.pacho.geopost.UserModel;
 import com.pacho.geopost.activities.LoginActivity;
 import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;
 import com.pacho.geopost.utilities.AppConstants;
 
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -37,7 +53,7 @@ import static android.content.Context.MODE_PRIVATE;
  * Use the {@link ProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = "ProfileFragment";
 
     // TODO: Rename parameter arguments, choose names that match
@@ -49,7 +65,14 @@ public class ProfileFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    // View properties
     private Button mButtonLogout;
+    private TextView mTxtLastState;
+    private TextView mTxtUsername;
+    private MapView mMapProfileView;
+
+    private GoogleMap mMapRef;
+
     private HttpVolleyQueue volleyInstance;
     private String session_id;
     // Require an editor of shared preferences
@@ -97,8 +120,7 @@ public class ProfileFragment extends Fragment {
         editor = getActivity().getSharedPreferences(AppConstants.GEOPOST_PREFS, MODE_PRIVATE).edit();
     }
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    private void initializeViewElements(View view, Bundle savedInstanceState) {
         mButtonLogout = (Button)view.findViewById(R.id.btnLogout);
         mButtonLogout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,6 +128,21 @@ public class ProfileFragment extends Fragment {
                 doLogout();
             }
         });
+
+        mTxtLastState = (TextView) view.findViewById(R.id.txtLastState);
+        mTxtUsername = (TextView) view.findViewById(R.id.txtUsername);
+
+        // Gets the MapView from the XML layout and creates it
+        mMapProfileView = (MapView) view.findViewById(R.id.mapViewProfile);
+        mMapProfileView.onCreate(savedInstanceState);
+        mMapProfileView.getMapAsync(this);
+
+        MapsInitializer.initialize( this.getActivity() );
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        initializeViewElements(view, savedInstanceState);
     }
 
     private void doLogout() {
@@ -138,11 +175,69 @@ public class ProfileFragment extends Fragment {
         volleyInstance.getRequestQueue().add(request);
     }
 
+    private void getProfileInfo() {
+        String requestUri = Api.PROFILE + "?session_id=" + session_id;
+        Log.d(TAG, "getProfileInfo: firing request " + requestUri);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, requestUri, null,
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "getProfileInfo onRespose" + response.toString());
+
+                        Gson gson = new Gson();
+                        UserModel user = gson.fromJson(response.toString(), UserModel.class);
+
+                        mTxtLastState.setText( user.getMsg() );
+                        mTxtUsername.setText( user.getUsername() );
+
+                        ArrayList<UserModel> users = new ArrayList<UserModel>();
+                        users.add( user );
+                        addMarkers(users);
+
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, "getProfileInfo onError".concat(error.toString()));
+            }
+        });
+
+        volleyInstance.getRequestQueue().add(request);
+    }
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public void onMapReady(GoogleMap googleMap) {
+        Log.d(TAG, "Map is ready!");
+        mMapRef = googleMap;
+        mMapProfileView.onResume();
+
+        getProfileInfo();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        View v = inflater.inflate(R.layout.fragment_profile, container, false);
+
+
+
+        return v;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        populateViewForOrientation(inflater, (ViewGroup) getView());
+    }
+
+    private void populateViewForOrientation(LayoutInflater inflater, ViewGroup viewGroup ) {
+        viewGroup.removeAllViewsInLayout();
+        View subview = inflater.inflate(R.layout.fragment_profile, viewGroup);
+
+        initializeViewElements(subview, getArguments());
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -181,5 +276,47 @@ public class ProfileFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private void addMarkers(ArrayList<UserModel> users) {
+        Log.d(TAG, "AddMarkers");
+
+        if(users != null && users.size() > 0) {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            int usersAdded = 0;
+
+            for(int i = 0; i < users.size(); i++) {
+                Marker marker;
+                MarkerOptions markerOptions;
+                UserModel user = users.get(i);
+
+                if(user.getLat() != null && user.getLon() != null) {
+                    Log.d(TAG, "AddMarkers for user ".concat( user.getUsername()));
+                    LatLng userCoordinates = new LatLng( user.getLat(), user.getLon());
+
+                    markerOptions = new MarkerOptions().position( userCoordinates )
+                            .title( user.getUsername() );
+
+                    if(user.getMsg() != null) {
+                        markerOptions.snippet( user.getMsg() );
+                    }
+
+                    marker = mMapRef.addMarker( markerOptions );
+                    builder.include( marker.getPosition() );
+                    usersAdded++;
+                }
+            }
+
+            if(usersAdded > 0) {
+                LatLngBounds bounds = builder.build();
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 0);
+                mMapRef.animateCamera(cu);
+            }
+
+        } else {
+            // get the current position and move the camera where i am right now
+        }
+
+
     }
 }

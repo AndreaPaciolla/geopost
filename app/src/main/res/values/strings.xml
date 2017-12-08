@@ -29,4 +29,6 @@
 
     <!-- Add friend fragment -->
     <string name="addProfileFragment_btnAddFriend">Add friend</string>
+    <string name="menus_action_setting">Setting</string>
+    <string name="menus_about_us">About us</string>
 </resources>
