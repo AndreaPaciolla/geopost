@@ -23,7 +23,6 @@
         android:backgroundTint="@color/colorPrimary"
         android:elevation="0dp"
         android:padding="25dp"
-        android:text="Update state"
-        android:textColor="@color/colorWhite" />
+        android:text="Update state" />
 
 </FrameLayout>

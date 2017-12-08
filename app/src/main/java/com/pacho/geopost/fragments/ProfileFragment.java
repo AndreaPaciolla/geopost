@@ -32,7 +32,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.pacho.geopost.R;
-import com.pacho.geopost.UserModel;
+import com.pacho.geopost.models.UserModel;
 import com.pacho.geopost.activities.LoginActivity;
 import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;

@@ -20,7 +20,6 @@
         android:layout_marginTop="100dp"
         android:backgroundTint="@color/colorPrimary"
         android:elevation="0dp"
-        android:text="@string/addProfileFragment_btnAddFriend"
-        android:textColor="@color/colorWhite" />
+        android:text="@string/addProfileFragment_btnAddFriend"/>
 
 </FrameLayout>

@@ -1,4 +1,4 @@
-package com.pacho.geopost;
+package com.pacho.geopost.models;
 
 /**
  * Created by do_ma on 18/11/2017.
@@ -10,6 +10,8 @@ public class UserModel {
 
     String msg;
 
+    Float distanceFromMe;
+
     Double lat;
 
     Double lon;
@@ -19,6 +21,14 @@ public class UserModel {
         this.msg = msg;
         this.lat = lat;
         this.lon = lon;
+    }
+
+    public void constructor(String username, String msg, Double lat, Double lon, Float distanceFromMe) {
+        this.username = username;
+        this.msg = msg;
+        this.lat = lat;
+        this.lon = lon;
+        this.distanceFromMe = distanceFromMe;
     }
 
     public String getUsername() {
@@ -51,5 +61,13 @@ public class UserModel {
 
     public void setLon(Double lon) {
         this.lon = lon;
+    }
+
+    public Float getDistanceFromMe() {
+        return distanceFromMe;
+    }
+
+    public void setDistanceFromMe(Float distanceFromMe) {
+        this.distanceFromMe = distanceFromMe;
     }
 }
