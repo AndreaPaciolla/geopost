@@ -1,13 +1,33 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.pacho.geopost.fragments.UpdateStateFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:id="@+id/txtHead"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:textSize="28sp"
+        android:textAlignment="center"
+        android:text="Update your state" />
+
+    <TextView
+        android:id="@+id/txtSuggestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtHead"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:textSize="11sp"
+        android:textAlignment="center"
+        android:text="What's up out there? Let others to know what you are doing" />
 
     <EditText
         android:id="@+id/txtState"
+        android:layout_below="@+id/txtSuggestion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -19,10 +39,10 @@
         android:id="@+id/btnUpdateState"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:backgroundTint="@color/colorPrimary"
-        android:elevation="0dp"
-        android:padding="25dp"
+        android:layout_below="@+id/txtState"
+        android:layout_marginTop="15dp"
+        android:backgroundTint="@android:color/holo_blue_light"
+        android:textColor="@color/colorWhite"
         android:text="Update state" />
 
-</FrameLayout>
+</RelativeLayout>

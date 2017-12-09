@@ -16,13 +16,16 @@
         android:layout_height="fill_parent"
         android:visibility="invisible" />
 
-    <Button
+    <ImageView
         android:id="@+id/btnChangeView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="15dp"
         android:layout_alignParentRight="true"
-        android:background="@android:color/transparent"
-        android:backgroundTint="@android:color/transparent"
+        android:adjustViewBounds="false"
+        android:background="@drawable/ic_list_black_24dp"
+        android:cropToPadding="false"
+        android:scaleType="center"
         android:text="List view" />
 
 </RelativeLayout>

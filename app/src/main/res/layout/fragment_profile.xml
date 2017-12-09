@@ -1,27 +1,65 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.pacho.geopost.fragments.ProfileFragment">
 
     <TextView
+        android:id="@+id/txtHero"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:textAlignment="center"
+        android:text="My profile" />
+
+    <TextView
+        android:id="@+id/txtHeroSuggestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15sp"
+        android:layout_below="@+id/txtHero"
+        android:textSize="11sp"
+        android:textAlignment="center"
+        android:text="Here are your personal activities" />
+
+    <TextView
+        android:id="@+id/txtHead"
+        android:layout_below="@+id/txtHeroSuggestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:text="Logged in as " />
+
+    <TextView
         android:id="@+id/txtUsername"
+        android:layout_toRightOf="@+id/txtHead"
+        android:layout_below="@+id/txtHeroSuggestion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/colorAccent" />
 
     <TextView
-        android:id="@+id/txtLastState"
-        android:layout_width="match_parent"
+        android:id="@+id/txtSuggestion"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txtUsername"
-        android:layout_marginTop="100dp" />
+        android:layout_below="@+id/txtHead"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:text="Last state was: " />
+
+    <TextView
+        android:id="@+id/txtLastState"
+        android:layout_toRightOf="@+id/txtSuggestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtUsername" />
 
     <com.google.android.gms.maps.MapView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/mapViewProfile"
-        android:layout_marginTop="140dp" />
+        android:layout_height="match_parent"
+        android:layout_below="@+id/txtLastState"
+        android:id="@+id/mapViewProfile" />
 
     <Button
         android:id="@+id/btnLogout"
@@ -29,7 +67,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginTop="55dp"
-        android:backgroundTint="@color/colorAccent"
-        android:text="LOGOUT"/>
+        android:backgroundTint="@android:color/holo_red_dark"
+        android:text="LOGOUT"
+        android:textColor="@android:color/white" />
 
-</FrameLayout>
+</RelativeLayout>

@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -78,7 +79,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private boolean mLocationPermissionGranted = false;
 
-    private Button mButtonChangeView;
+    private ImageView mButtonChangeView;
     private ListView mFollowedUsersListView;
 
     private String mCurrentViewMode = "MAP"; // MAP | LIST
@@ -237,14 +238,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         // Change view
         mFollowedUsersListView = (ListView) v.findViewById(R.id.followedUsersListView);
-        mButtonChangeView = (Button) v.findViewById(R.id.btnChangeView);
+        mButtonChangeView = (ImageView) v.findViewById(R.id.btnChangeView);
         mButtonChangeView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggleViewMode();
             }
         });
-        mButtonChangeView.setBackgroundResource(R.drawable.ic_list_black_24dp);
+        mButtonChangeView.setImageResource(R.drawable.ic_list_black_24dp);
 
         return v;
     }
@@ -305,12 +306,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private void toggleViewMode() {
         if(mCurrentViewMode.equals("MAP")) {
             mCurrentViewMode = "LIST";
-            mButtonChangeView.setBackgroundResource(R.drawable.ic_map_black_24dp);
+            mButtonChangeView.setImageResource(R.drawable.ic_map_black_24dp);
             mapView.setVisibility(View.INVISIBLE);
             mFollowedUsersListView.setVisibility(View.VISIBLE);
         } else {
             mCurrentViewMode = "MAP";
-            mButtonChangeView.setBackgroundResource(R.drawable.ic_list_black_24dp);
+            mButtonChangeView.setImageResource(R.drawable.ic_list_black_24dp);
             mapView.setVisibility(View.VISIBLE);
             mFollowedUsersListView.setVisibility(View.INVISIBLE);
         }

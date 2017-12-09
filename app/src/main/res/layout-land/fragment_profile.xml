@@ -1,88 +1,104 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.pacho.geopost.fragments.ProfileFragment"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--<LinearLayout
+    <ScrollView
+        android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:text="Whatever You Want Here"
+
+        <RelativeLayout android:id="@+id/profile_fragment_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="36sp"/>
-    </LinearLayout>-->
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center">
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/txtUsername"
-                android:layout_width="0dp"
+                android:id="@+id/txtHero"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:textSize="28sp"
-                android:gravity="center" />
+                android:textAlignment="center"
+                android:text="My profile" />
+
+            <TextView
+                android:id="@+id/txtHeroSuggestion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15sp"
+                android:layout_below="@+id/txtHero"
+                android:textSize="11sp"
+                android:textAlignment="center"
+                android:text="Here are your personal activities" />
+
+
+
+
+
+            <TextView
+                android:id="@+id/txtHead"
+                android:layout_below="@+id/txtHeroSuggestion"
+                android:layout_alignParentStart="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:text="Logged in as " />
+
+
+            <TextView
+                android:text="Andrea paciolla"
+                android:id="@+id/txtUsername"
+                android:layout_toRightOf="@+id/txtHead"
+                android:layout_below="@+id/txtHeroSuggestion"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textSize="14sp" />
+
+
+            <TextView
+                android:id="@+id/txtSuggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txtHead"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:text="Last state was: " />
+
+            <TextView
+                android:text="Eating something"
+                android:id="@+id/txtLastState"
+                android:layout_toRightOf="@+id/txtSuggestion"
+                android:layout_below="@+id/txtUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
 
             <com.google.android.gms.maps.MapView
                 android:id="@+id/mapViewProfile"
-                android:layout_width="0dp"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/txtHeroSuggestion"
+                android:layout_width="300dp"
                 android:layout_height="300dp"
-                android:layout_weight="1"
                 android:gravity="center" />
 
-        </LinearLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:textSize="28sp"
-            android:gravity="center">
-
-            <TextView
-                android:id="@+id/txtLastState"
-                android:layout_width="0dp"
+            <Button
+                android:id="@+id/btnLogout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center" />
+                android:layout_alignParentBottom="true"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:gravity="center"
+                android:text="LOGOUT"
+                android:textColor="@android:color/white" />
 
-        </LinearLayout>
-
-    </LinearLayout>
+        </RelativeLayout>
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center">
+    </ScrollView>
 
-        <Button
-            android:id="@+id/btnLogout"
-            android:backgroundTint="@color/colorAccent"
-            android:text="LOGOUT"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>
