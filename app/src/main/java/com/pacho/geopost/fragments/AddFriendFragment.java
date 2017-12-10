@@ -17,6 +17,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -31,6 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -146,7 +148,7 @@ public class AddFriendFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(context, "Add friend fragment attached", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Now you can follow a new friend", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -173,7 +175,7 @@ public class AddFriendFragment extends Fragment {
 
     public void queryUsers(String findText) {
 
-        String requestUri = Api.USERS.concat("?").concat(session_id).concat("&usernamestart=").concat(findText).concat("&limit=5");
+        String requestUri = Api.USERS + "?session_id=" + session_id + "&usernamestart=" + findText + "&limit=5";
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, requestUri, null,
             new Response.Listener<JSONObject>() {
@@ -202,8 +204,12 @@ public class AddFriendFragment extends Fragment {
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // TODO Auto-generated method stub
                     Log.d(TAG, "queryUsers onError".concat(error.toString()));
+                    NetworkResponse networkResponse = error.networkResponse;
+                    if (networkResponse != null && networkResponse.statusCode == 400) {
+                        // HTTP Status Code: 400 bad request
+                        Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                    }
                 }
             });
 
@@ -234,8 +240,18 @@ public class AddFriendFragment extends Fragment {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                // TODO Auto-generated method stub
                 Log.d(TAG, "queryUsers onError".concat(error.toString()));
+                NetworkResponse networkResponse = error.networkResponse;
+                if (networkResponse != null && networkResponse.statusCode == 400 && error.networkResponse.data != null) {
+                    // HTTP Status Code: 400 bad request
+                    try {
+                        String body = new String(error.networkResponse.data,"UTF-8");
+                        Toast.makeText(getContext(), body, Toast.LENGTH_LONG).show();
+                    } catch (UnsupportedEncodingException e) {
+                        // exception
+                        Log.d(TAG, "queryUsers onError unsupported encoding");
+                    }
+                }
             }
         });
 

@@ -253,7 +253,7 @@ public class ProfileFragment extends Fragment implements OnMapReadyCallback {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(context, "Profile fragment attached", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Check your activities", Toast.LENGTH_SHORT).show();
         }
     }
 

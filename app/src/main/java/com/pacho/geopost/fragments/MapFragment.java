@@ -262,7 +262,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(context, "Map fragment attached", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Find your friends", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -221,7 +221,7 @@ public class UpdateStateFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(context, "Update state fragment attached", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Say something new", Toast.LENGTH_SHORT).show();
         }
     }
 
