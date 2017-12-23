@@ -54,6 +54,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static java.lang.Math.round;
+
 
 /**
  * A simple {@link Fragment} subclass.

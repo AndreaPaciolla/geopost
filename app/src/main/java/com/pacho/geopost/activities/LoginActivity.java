@@ -70,6 +70,11 @@ public class LoginActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.login_progress);
 
         editor = getSharedPreferences(AppConstants.GEOPOST_PREFS, MODE_PRIVATE).edit();
+
+        // if i am already logged in, bring me to the dashboard
+        if( this.getSharedPreferences(AppConstants.GEOPOST_PREFS, MODE_PRIVATE).getString(AppConstants.SESSION_ID, null) != null ) {
+            startDashboard();
+        }
     }
 
     /**

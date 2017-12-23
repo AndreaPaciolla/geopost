@@ -65,10 +65,10 @@ public class ListItemAdapter extends BaseAdapter {
                 if( distance > 10000) { // it means data come from NULL values...
                     mTxtDistance.setText( "N.A." );
                 } else {
-                    mTxtDistance.setText( distance + " km" );
+                    mTxtDistance.setText( Math.round(distance/100.0*100.0) + " km" );
                 }
             } else {
-                mTxtDistance.setText( distance + " m" );
+                mTxtDistance.setText( Math.round(distance/100.0*100.0) + " m" );
             }
 
         }
