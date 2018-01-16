@@ -110,11 +110,15 @@ public class UpdateStateFragment extends Fragment {
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                if(location == null) {
-                    Toast.makeText(getContext(), "Null location got", Toast.LENGTH_LONG).show();
-                } else {
-                    currentLocation = location;
-                    Toast.makeText(getContext(), "Location got. Lat: " + location.getLatitude() + ", Lon: " + location.getLongitude(), Toast.LENGTH_LONG).show();
+                try {
+                    if(location == null) {
+                        Toast.makeText(getContext(), "Null location got", Toast.LENGTH_LONG).show();
+                    } else {
+                        currentLocation = location;
+                        Toast.makeText(getContext(), "Location got. Lat: " + location.getLatitude() + ", Lon: " + location.getLongitude(), Toast.LENGTH_LONG).show();
+                    }
+                } catch(Exception e) {
+                    Log.d(TAG, "onLocationChanged method: Caught exception on location got...");
                 }
             }
 

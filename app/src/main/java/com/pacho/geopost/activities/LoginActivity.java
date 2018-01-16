@@ -29,7 +29,6 @@ import com.pacho.geopost.R;
 import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;
 import com.pacho.geopost.utilities.AppConstants;
-import com.tapadoo.alerter.Alerter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -128,10 +127,6 @@ public class LoginActivity extends AppCompatActivity {
                         public void onResponse(String response) {
                             Log.d("BackgroundLoginRequest", "onResponse token ".concat(response.toString()));
                             showProgress(false);
-                            Alerter.create(that)
-                                    .setTitle("Alert Title")
-                                    .setText(response.toString())
-                                    .show();
 
                             // Store the session_id just created by login
                             editor.putString(AppConstants.SESSION_ID, response.toString());
