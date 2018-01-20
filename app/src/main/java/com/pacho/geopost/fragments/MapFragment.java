@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -46,6 +47,7 @@ import com.pacho.geopost.adapters.ListItemAdapter;
 import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;
 import com.pacho.geopost.utilities.AppConstants;
+import com.pacho.geopost.utilities.AppUtility;
 import com.pacho.geopost.utilities.LocationComparator;
 
 import org.json.JSONArray;
@@ -145,18 +147,46 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch(requestCode) {
+            case REQUEST_LOCATION:
+                getLocationPermission();
+                break;
+        }
+    }
+
     private void getLocationPermission() {
         mLocationManager = (LocationManager) getActivity().getSystemService(getContext().LOCATION_SERVICE);
 
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                if(location == null) {
-                    Toast.makeText(getContext(), "Null location got", Toast.LENGTH_LONG).show();
-                } else {
-                    currentLocation = location;
-                    orderFriendsListByDistance();
-                    Toast.makeText(getContext(), "Location got. Lat: " + location.getLatitude() + ", Lon: " + location.getLongitude(), Toast.LENGTH_LONG).show();
+                try {
+                    if(location == null) {
+                        Toast.makeText(getContext(), "Trying to find your location...", Toast.LENGTH_LONG).show();
+                    } else {
+                        Log.d(TAG, "onLocationChanged method: Lat: " + location.getLatitude() + ", Lon: " + location.getLongitude() );
+                        currentLocation = location;
+                        orderFriendsListByDistance();
+                        Toast.makeText(getContext(), "Location found", Toast.LENGTH_LONG).show();
+
+                        // Draw my position
+                        if( currentLocation != null ) {
+                            LatLng userCoordinates = new LatLng( currentLocation.getLatitude(), currentLocation.getLongitude());
+
+                            MarkerOptions markerOptions = new MarkerOptions()
+                                    .position( userCoordinates )
+                                    .title( "My position" )
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+
+                            Marker marker = map.addMarker( markerOptions );
+                        }
+
+                    }
+                } catch( Exception e ) {
+                    Log.d(TAG, "getLocationPermission method :: onLocationChanged cb: " + e.getMessage());
                 }
             }
 
@@ -167,18 +197,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             @Override
             public void onProviderEnabled(String s) {
-
+                Log.d(TAG, "Location provider is already enabled. OK");
             }
 
             @Override
             public void onProviderDisabled(String s) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
+                AppUtility.showGPSDiabledDialog(getContext());
             }
         };
 
-        if (ActivityCompat.checkSelfPermission(getContext(), FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getContext(), COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        int accessFineLocation = ActivityCompat.checkSelfPermission(getContext(), FINE_LOCATION);
+        int accessCoarseLocation = ActivityCompat.checkSelfPermission(getContext(), COARSE_LOCATION);
+
+        if (accessFineLocation != PackageManager.PERMISSION_GRANTED && accessCoarseLocation != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "getLocationPermission method :: location access NOK.");
             requestPermissions(new String[]{
                     android.Manifest.permission.ACCESS_FINE_LOCATION,
                     android.Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -186,7 +218,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }, REQUEST_LOCATION);
             return;
         } else {
-            configureButton();
+            Log.d(TAG, "getLocationPermission method :: location access OK");
+            mLocationManager.requestLocationUpdates("gps", 10000, 0, mLocationListener);
         }
     }
 
@@ -210,10 +243,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             setListViewAdapter(followedUsers, true);
             Log.d(TAG, "orderFriendsListByDistance : After " + followedUsers.toString());
         }
-    }
-
-    private void configureButton() {
-        mLocationManager.requestLocationUpdates("gps", 5000, 0, mLocationListener);
     }
 
     @Override
@@ -267,7 +296,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(context, "Find your friends", Toast.LENGTH_SHORT).show();
+            if(AppUtility.isNetworkAvailable(context)) {
+                Toast.makeText(context, "Find your friends", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -418,30 +449,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
 
         }
-
-        // Draw my position if available
-
-
-        // get the current position and move the camera where i am right now
-//        if( currentLocation != null ) {
-//            LatLng userCoordinates = new LatLng( currentLocation.getLatitude(), currentLocation.getLongitude());
-//
-//            MarkerOptions markerOptions = new MarkerOptions()
-//                    .position( userCoordinates )
-//                    .title( "My position" )
-//                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_my_position));
-//
-//            Marker marker = map.addMarker( markerOptions );
-//
-//            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-//            builder.include( marker.getPosition() );
-//            LatLngBounds bounds = builder.build();
-//
-//            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 0);
-//            map.animateCamera(cu);
-//        }
-
-
 
     }
 

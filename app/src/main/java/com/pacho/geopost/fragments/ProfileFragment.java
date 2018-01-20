@@ -26,6 +26,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -37,6 +38,7 @@ import com.pacho.geopost.activities.LoginActivity;
 import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;
 import com.pacho.geopost.utilities.AppConstants;
+import com.pacho.geopost.utilities.AppUtility;
 
 import org.json.JSONObject;
 
@@ -253,7 +255,9 @@ public class ProfileFragment extends Fragment implements OnMapReadyCallback {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(context, "Check your activities", Toast.LENGTH_SHORT).show();
+            if(AppUtility.isNetworkAvailable(context)) {
+                Toast.makeText(context, "Check your activities", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -295,7 +299,8 @@ public class ProfileFragment extends Fragment implements OnMapReadyCallback {
                     LatLng userCoordinates = new LatLng( user.getLat(), user.getLon());
 
                     markerOptions = new MarkerOptions().position( userCoordinates )
-                            .title( user.getUsername() );
+                            .title( user.getUsername() )
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 
                     if(user.getMsg() != null) {
                         markerOptions.snippet( user.getMsg() );

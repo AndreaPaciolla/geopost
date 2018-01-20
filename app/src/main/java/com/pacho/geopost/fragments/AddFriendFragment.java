@@ -27,6 +27,7 @@ import com.pacho.geopost.R;
 import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;
 import com.pacho.geopost.utilities.AppConstants;
+import com.pacho.geopost.utilities.AppUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -148,7 +149,9 @@ public class AddFriendFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(context, "Now you can follow a new friend", Toast.LENGTH_SHORT).show();
+            if(AppUtility.isNetworkAvailable(context)) {
+                Toast.makeText(context, "Now you can follow a new friend", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

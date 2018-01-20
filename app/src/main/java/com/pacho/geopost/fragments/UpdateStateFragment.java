@@ -37,6 +37,7 @@ import com.pacho.geopost.R;
 import com.pacho.geopost.services.HttpVolleyQueue;
 import com.pacho.geopost.utilities.Api;
 import com.pacho.geopost.utilities.AppConstants;
+import com.pacho.geopost.utilities.AppUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -105,6 +106,10 @@ public class UpdateStateFragment extends Fragment {
                          .getSharedPreferences(AppConstants.GEOPOST_PREFS, this.getActivity().MODE_PRIVATE)
                          .getString(AppConstants.SESSION_ID, null);
 
+        getLocationPermission();
+    }
+
+    private void getLocationPermission() {
         mLocationManager = (LocationManager) getActivity().getSystemService(getContext().LOCATION_SERVICE);
 
         mLocationListener = new LocationListener() {
@@ -112,19 +117,20 @@ public class UpdateStateFragment extends Fragment {
             public void onLocationChanged(Location location) {
                 try {
                     if(location == null) {
-                        Toast.makeText(getContext(), "Null location got", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Trying to find your location...", Toast.LENGTH_LONG).show();
                     } else {
+                        Log.d(TAG, "onLocationChanged method: Lat: " + location.getLatitude() + ", Lon: " + location.getLongitude() );
                         currentLocation = location;
-                        Toast.makeText(getContext(), "Location got. Lat: " + location.getLatitude() + ", Lon: " + location.getLongitude(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Location found", Toast.LENGTH_LONG).show();
                     }
                 } catch(Exception e) {
-                    Log.d(TAG, "onLocationChanged method: Caught exception on location got...");
+                    Log.d(TAG, "onLocationChanged method: Caught exception on location got..." + e.getMessage());
                 }
             }
 
             @Override
             public void onStatusChanged(String s, int i, Bundle bundle) {
-
+                Log.d(TAG, "onStatusChanged callback:" + s.toString());
             }
 
             @Override
@@ -134,33 +140,33 @@ public class UpdateStateFragment extends Fragment {
 
             @Override
             public void onProviderDisabled(String s) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
+                AppUtility.showGPSDiabledDialog(getContext());
             }
         };
 
-        if (ActivityCompat.checkSelfPermission(getContext(), FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getContext(), COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        int accessFineLocation = ActivityCompat.checkSelfPermission(getContext(), FINE_LOCATION);
+        int accessCoarseLocation = ActivityCompat.checkSelfPermission(getContext(), COARSE_LOCATION);
+
+        if (accessFineLocation != PackageManager.PERMISSION_GRANTED && accessCoarseLocation != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "getLocationPermission method :: location access NOK.");
             requestPermissions(new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.INTERNET
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                    android.Manifest.permission.INTERNET
             }, REQUEST_LOCATION);
             return;
         } else {
-            configureButton();
+            Log.d(TAG, "getLocationPermission method :: location access OK");
+            mLocationManager.requestLocationUpdates("gps", 10000, 0, mLocationListener);
         }
-
-
     }
 
     private void updateState(Editable text) {
 
         // Avoid crash if we don't have currentLocation
         if( currentLocation == null ) {
-            currentLocation = new Location("dummyprovider");
-            currentLocation.setLatitude(45.4942699);
-            currentLocation.setLongitude(9.1122565);
+            Toast.makeText(getContext(), "Cannot find your position...", Toast.LENGTH_LONG).show();
+            return;
         }
 
         String requestUri = Api.STATUS_UPDATE + "?session_id=" + session_id + "&message=" + text.toString() + "&lat="+currentLocation.getLatitude()+"&lon="+currentLocation.getLongitude();
@@ -185,17 +191,12 @@ public class UpdateStateFragment extends Fragment {
         volleyInstance.getRequestQueue().add(request);
     }
 
-    private void configureButton() {
-        mLocationManager.requestLocationUpdates("gps", 5000, 0, mLocationListener);
-    }
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch(requestCode) {
             case REQUEST_LOCATION:
-                configureButton();
+                getLocationPermission();
                 break;
         }
     }
@@ -225,7 +226,9 @@ public class UpdateStateFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            Toast.makeText(context, "Say something new", Toast.LENGTH_SHORT).show();
+            if(AppUtility.isNetworkAvailable(context)) {
+                Toast.makeText(context, "Say something new", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

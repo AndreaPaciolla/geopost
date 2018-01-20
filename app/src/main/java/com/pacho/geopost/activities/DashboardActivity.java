@@ -1,6 +1,6 @@
 package com.pacho.geopost.activities;
 
-import android.content.res.Configuration;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,23 +9,25 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.pacho.geopost.fragments.AddFriendFragment;
-import com.pacho.geopost.fragments.DashboardFragment;
 import com.pacho.geopost.fragments.MapFragment;
 import com.pacho.geopost.R;
 import com.pacho.geopost.fragments.ProfileFragment;
 import com.pacho.geopost.fragments.UpdateStateFragment;
+import com.pacho.geopost.utilities.AppUtility;
 import com.pacho.geopost.utilities.BottomNavigationViewHelper;
 
 public class DashboardActivity extends AppCompatActivity {
+
+    private Context mActivityContext = this;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+            AppUtility.checkNetwork(mActivityContext);
 
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -55,6 +57,8 @@ public class DashboardActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+
+        AppUtility.checkNetwork(mActivityContext);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         BottomNavigationViewHelper.disableShiftMode(navigation);
